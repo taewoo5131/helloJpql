@@ -13,36 +13,63 @@ public class JpaMain {
         try {
             tx.begin();
 
+            Team newCastle = new Team();
+            newCastle.setName("뉴캐슬");
+            em.persist(newCastle);
+
+            Team chelsea = new Team();
+            chelsea.setName("첼시");
+            em.persist(chelsea);
+
             Member member = new Member();
-            member.setUsername("taewoo");
+            member.setUsername("존조셸비");
             member.setAge(20);
+            member.setTeam(newCastle);
             em.persist(member);
 
             Member member2 = new Member();
-            member2.setUsername("jihye");
+            member2.setUsername("칼럼윌슨");
             member2.setAge(18);
+            member2.setTeam(newCastle);
             em.persist(member2);
 
-            em.flush();
-            em.clear();
+            Member member3 = new Member();
+            member3.setUsername("베르너");
+            member3.setAge(30);
+            member3.setTeam(chelsea);
+            em.persist(member3);
 
-//            TypedQuery<Member> result = em.createQuery("select m from Member m", Member.class);
-//            List<Member> resultList = result.getResultList();
-//
-//            TypedQuery<Member> result2 = em.createQuery("select m from Member m", Member.class);
-//            Member singleResult = result2.getSingleResult();
 
-            TypedQuery<Member> query = em.createQuery("select m from Member m where m.username =:username", Member.class);
-            query.setParameter("username","taewoo");
-            Member singleResult1 = query.getSingleResult();
-            TypedQuery<Member> query1 =
-                    em.createQuery("select m from Member m where m.username =?1 and m.age =?2", Member.class);
-            query1.setParameter(1, "jihye");
-            query1.setParameter(2, 18);
-            Member singleResult2 = query1.getSingleResult();
-            System.out.println(singleResult1.getUsername());
-            System.out.println(singleResult2.getUsername());
+            // inner join
+            String sql = "select m from Member m inner join Team t on m.team.id = t.id where t.name = '뉴캐슬'";
+            List<Member> resultList = em.createQuery(sql , Member.class)
+                    .getResultList();
 
+            for (Member findMember : resultList) {
+                System.out.println("findMember >> " + findMember);
+            }
+
+            System.out.println("-------------------------------------------------------");
+
+            // left join
+            String sql2 = "select m from Member m left join Team t on m.team.id = t.id";
+            List<Member> resultList2 = em.createQuery(sql2, Member.class)
+                    .getResultList();
+
+            for (Member findMember : resultList2) {
+                System.out.println("findMember >> " + findMember);
+            }
+
+            System.out.println("-------------------------------------------------------");
+
+            // theta join
+            String sql3 = "select m from Member m , Team t where m.team.id = t.id";
+            List<Member> resultList3 = em.createQuery(sql3, Member.class)
+                    .getResultList();
+
+            for (Member findMember : resultList3) {
+                System.out.println("findMember >> " + findMember);
+            }
 
             tx.commit();
         } catch (Exception e) {
